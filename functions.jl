@@ -7,10 +7,13 @@ function createParticlesGauss(n, sigma1, sigma2, velocity)
 end
 
 function coulombForce(electrons)
-    @spawn for i = 1:axes(electrons,3)
-        R_array = zeros(size(electrons,3));
-        R_array[i] = norm(electrons[:,1,i]);
-    end
+    k = 8.9875517923e9
+    q = 1.60217663e-19
+    SubVecs = pairwise(-,eachcol(electrons[:,1,:]));
+    DistVecs = pairwise(Euclidean(),electrons[:,1,:],dims=2);
+    Force = k*q.^2 ./DistVecs.^3 .* SubVecs;
+    Force[Force==[NaN,NaN]] = [0,0]
+    return Force;
 end
 
 function stepInTime(electrons, t1, t2)
