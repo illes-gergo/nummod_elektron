@@ -23,13 +23,16 @@ end
 
 
 function stepInTime(electrons, dt, Forces)
-    electrons[:, 3, :] .= Forces / m_e
+    m_electron = 9.1093837e-31
+    m_e = rel_mass(m_electron, electrons[:, 2, :])
+    electrons[:, 3, :] .= Forces ./ m_e
     electrons[:, 2, :] .+= electrons[:, 3, :] * dt
     electrons[:, 1, :] .+= electrons[:, 2, :] * dt
     return electrons
 end
 
 function rel_mass(m, v)
-    m_rel = m / sqrt(1 - norm(v)^2 / c^2)
-    return m_rel
+    c = 3e8
+    m_rel = m ./ sqrt.(1 - norm(v) .^ 2 ./ c .^ 2)
+    return cat(m_rel, m_rel, dims=1)
 end
