@@ -9,12 +9,12 @@ end
 function coulombForce(electrons)
     k = 8.9875517923e9
     q = 1.60217663e-19
-    SubVecs = pairwise(-,eachcol(electrons[:,1,:]));
-    DistVecs = pairwise(Euclidean(),electrons[:,1,:],dims=2);
-    Force = k*q.^2 ./DistVecs.^3 .* SubVecs;
-    Force[Force==[NaN,NaN]] = [0,0]
-    return Force;
+    @. SubVecs = pairwise(-, eachcol(electrons[:, 1, :]))
+    @. DistVecs = pairwise(Euclidean(), electrons[:, 1, :], dims=2)
+    @. Force = k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecs
+    return Force
 end
+
 
 function stepInTime(electrons, t1, t2)
     dt = t2 - t1
