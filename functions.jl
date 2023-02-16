@@ -9,18 +9,23 @@ end
 function coulombForce(electrons)
     k = 8.9875517923e9
     q = 1.60217663e-19
-    @. SubVecs = pairwise(-, eachcol(electrons[:, 1, :]))
-    @. DistVecs = pairwise(Euclidean(), electrons[:, 1, :], dims=2)
-    @. Force = k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecs
-    return Force
+    SubVecsX = pairwise(-, electrons[1, 1, :])
+    SubVecsY = pairwise(-, electrons[2, 1, :])
+    DistVecs = pairwise(Euclidean(), electrons[:, 1, :], dims=2)
+    ForceX = -k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecsX
+    ForceY = -k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecsY
+    ForceX[I(size(electrons, 3))] .= 0
+    ForceY[I(size(electrons, 3))] .= 0
+    sForceX = sum(ForceX, dims=1)
+    sForceY = sum(ForceY, dims=1)
+    return cat(sForceX, sForceY, dims=1)
 end
 
 
-function stepInTime(electrons, t1, t2)
-    dt = t2 - t1
-    electrons[:, 2, :] = electrons[:, 3, :] * dt
-    electrons[:, 1, :] = electrons[:, 2, :] * dt
-    electrons[:, 3, :] .= 0
+function stepInTime(electrons, dt, Forces)
+    electrons[:, 3, :] .= Forces / m_e
+    electrons[:, 2, :] .+= electrons[:, 3, :] * dt
+    electrons[:, 1, :] .+= electrons[:, 2, :] * dt
     return electrons
 end
 
