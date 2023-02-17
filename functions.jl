@@ -10,16 +10,24 @@ end
 function coulombForce(electrons)
     k = 8.9875517923e9
     q = 1.60217663e-19
-    SubVecsX = pairwise(-, electrons[1, 1, :])
-    SubVecsY = pairwise(-, electrons[2, 1, :])
     DistVecs = pairwise(Euclidean(), electrons[:, 1, :], dims=2)
-    ForceX = -k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecsX
-    ForceY = -k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecsY
-    ForceX[I(size(electrons, 3))] .= 0
-    ForceY[I(size(electrons, 3))] .= 0
-    sForceX = sum(ForceX, dims=1)
-    sForceY = sum(ForceY, dims=1)
-    return cat(sForceX, sForceY, dims=1)
+    XComp = @spawn begin
+        #SubVecsX = pairwise(-, electrons[1, 1, :])
+        SubVecsX = pairwiseSubtract(electrons[1, 1, :])
+        ForceX = -k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecsX
+        ForceX[I(size(electrons, 3))] .= 0
+        sForceX = sum(ForceX, dims=1)
+    end
+
+    YComp = @spawn begin
+        #SubVecsY = pairwise(-, electrons[2, 1, :])
+        SubVecsY = pairwiseSubtract(electrons[2, 1, :])
+        ForceY = -k .* q .^ 2 ./ DistVecs .^ 3 .* SubVecsY
+        ForceY[I(size(electrons, 3))] .= 0
+        sForceY = sum(ForceY, dims=1)
+    end
+
+    return cat(fetch(XComp), fetch(YComp), dims=1)
 end
 
 function lorentzForce(electrons)
@@ -50,4 +58,12 @@ function rel_mass(m, v)
     c = 3e8
     m_rel = m ./ sqrt.(1 - norm(v) .^ 2 ./ c .^ 2)
     return cat(m_rel, m_rel, dims=1)
+end
+
+function pairwiseSubtract(a)
+    output = Array{Float64}(undef, length(a), length(a))
+    @spawn for i in eachindex(a), j in eachindex(a)
+        output[i, j] = a[i] - a[j]
+    end
+    return output
 end
