@@ -3,6 +3,7 @@ function createParticlesGauss(n, sigma1, sigma2, velocity)
     electrons[1, 1, :] = randn(size(electrons[1, 1, :])) * sigma1
     electrons[2, 1, :] = randn(size(electrons[1, 1, :])) * sigma2
     electrons[1, 2, :] .= velocity
+    #electrons[2, 2, :] .= -(electrons[2, 1, :]) .* velocity .* 1e5
     return electrons
 end
 
@@ -21,6 +22,20 @@ function coulombForce(electrons)
     return cat(sForceX, sForceY, dims=1)
 end
 
+function lorentzForce(electrons)
+    q = 1.60217663e-19
+    magnetic = magneticField(electrons[1, 1, :], electrons[2, 1, :])
+    ForceX = -1.0 .* electrons[2, 2, :] .* magnetic .* q
+    ForceY = electrons[1, 2, :] .* magnetic .* q
+    return cat(transpose(ForceX), transpose(ForceY), dims=1)
+end
+
+function magneticField(x, y)
+    fieldStrength = 0.2
+    period = 10e-6
+    MagField = cos.(2 * pi * 1 ./ period * x) * fieldStrength
+    return MagField
+end
 
 function stepInTime(electrons, dt, Forces)
     m_electron = 9.1093837e-31
