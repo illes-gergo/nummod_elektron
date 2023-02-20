@@ -41,7 +41,7 @@ end
 function magneticField(x, y)
     fieldStrength = 0.2
     period = 10e-6
-    MagField = cos.(2 * pi * 1 ./ period * x) * fieldStrength
+    MagField = cos.(2 * pi * 1 ./ period .* x) .* fieldStrength
     return MagField
 end
 
@@ -49,21 +49,32 @@ function stepInTime(electrons, dt, Forces)
     m_electron = 9.1093837e-31
     m_e = rel_mass(m_electron, electrons[:, 2, :])
     electrons[:, 3, :] .= Forces ./ m_e
-    electrons[:, 2, :] .+= electrons[:, 3, :] * dt
-    electrons[:, 1, :] .+= electrons[:, 2, :] * dt
+    electrons[:, 2, :] .+= electrons[:, 3, :] .* dt
+    electrons[:, 1, :] .+= electrons[:, 2, :] .* dt
     return electrons
 end
 
 function rel_mass(m, v)
     c = 3e8
-    m_rel = m ./ sqrt.(1 - norm(v) .^ 2 ./ c .^ 2)
+    m_rel = m ./ sqrt.(1 .- normPair(v) .^ 2 ./ c .^ 2)
     return cat(m_rel, m_rel, dims=1)
 end
 
 function pairwiseSubtract(a)
     output = Array{Float64}(undef, length(a), length(a))
-    @spawn for i in eachindex(a), j in eachindex(a)
+	@threads for i in eachindex(a)
+	for j in eachindex(a)
         output[i, j] = a[i] - a[j]
+end
     end
     return output
 end
+function normPair(v)
+	res = Array{Float64}(undef,1,size(v,2))
+	@threads for i = axes(v,2)
+		res[i] = norm(v[:,i])
+	end
+	return res;
+end
+
+ 
