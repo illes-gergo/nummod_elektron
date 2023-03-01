@@ -77,4 +77,7 @@ function normPair(v)
 	return res;
 end
 
- 
+function energy2velocity(energy)
+    me = 9.1093837e-31
+    
+end
