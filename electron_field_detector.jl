@@ -13,7 +13,7 @@ count = Int(1e2);
 xData = range(xStart, xEnd, length=count)
 yData = range(yStart, yEnd, length=count)
 
-dtSensor = 3e-14;
+dtSensor = 1.3e-14;
 t = range(start=0, step=dtSensor, length=count)
 c = 3e8;
 
@@ -38,9 +38,7 @@ for i in 1:count
     end
 end
 
-
-retard = false
-
+retard = true
 
 if retard == true
     p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
@@ -48,7 +46,7 @@ if retard == true
     for i in 1:count
         p.series_list[1].plotattributes[:z] = permutedims(interp_dist_data[i, :, :], [1, 2])
         display(p)
-        sleep(1 / 30)
+        sleep(1 / 10)
     end
 
 else
@@ -57,7 +55,7 @@ else
     for i in 1:count
         p.series_list[1].plotattributes[:z] = permutedims(dist_data[i, :, :], [1, 2])
         display(p)
-        sleep(1 / 30)
+        sleep(1 / 10)
     end
 
 end

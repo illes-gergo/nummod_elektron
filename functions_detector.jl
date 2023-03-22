@@ -6,7 +6,7 @@ end
 
 function createTrajectory(xStart, xEnd, count)
     xVals = range(xStart, xEnd, Int(count))'
-    return cat(xVals, zeros(size(xVals)), dims=1)
+    return cat(xVals, trajectory_y(xVals), dims=1)
 end
 
 function initDataArray(sensor, trajectory)
@@ -21,4 +21,8 @@ function calculateEField(electron_position, sensor, data, t)
     data[:, :, 1] .= distances .^ 0.5
     data[:, :, 2] .= t .+ distances ./ c0
     return data
+end
+
+function trajectory_y(xVals)
+    return sin.(2 .*pi .* xVals .* 1 ./ 1e-4) * 1e-5
 end
