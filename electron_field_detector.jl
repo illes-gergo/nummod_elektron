@@ -43,7 +43,7 @@ retard = false
 
 
 if retard == true
-    p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100, #=ylims=[yStart,yEnd]./5=#)
+    p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
 
     for i in 1:count
         p.series_list[1].plotattributes[:z] = permutedims(interp_dist_data[i, :, :], [1, 2])
@@ -52,7 +52,7 @@ if retard == true
     end
 
 else
-    p = contourf(xData, yData, permutedims(dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100, #=ylims=[yStart,yEnd]./5=#)
+    p = contourf(xData, yData, permutedims(dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
 
     for i in 1:count
         p.series_list[1].plotattributes[:z] = permutedims(dist_data[i, :, :], [1, 2])

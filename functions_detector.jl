@@ -18,7 +18,7 @@ function calculateEField(electron_position, sensor, data, t)
     XDiff = electron_position[1] .- sensor[:, :, 1]
     YDiff = electron_position[2] .- sensor[:, :, 2]
     distances = (XDiff .^ 2 .+ YDiff .^ 2) .^ 0.5
-    data[:, :, 1] .= distances.^0.5
+    data[:, :, 1] .= distances .^ 0.5
     data[:, :, 2] .= t .+ distances ./ c0
     return data
 end
