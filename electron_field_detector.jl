@@ -11,22 +11,24 @@ default(aspect_ratio=:auto)
     xEnd = -xStart
     yEnd = -yStart
     count = Int(1e2)
+    tCount = Int(1e2)
 
     xData = range(xStart, xEnd, length=count)
     yData = range(yStart, yEnd, length=count)
 
     dtSensor = 1.3e-14
-    t = range(start=0, step=dtSensor, length=count)
+    t = range(start=0, step=dtSensor, length=tCount)
     c = 3e8
 
     sensor = createGridArray(xStart, xEnd, count, yStart, yEnd, count)
 
-    trajectory = createTrajectory(xStart, xEnd, count)
+    trajectory = createTrajectory(xStart, xEnd, tCount)
 
     data = initDataArray(sensor, trajectory)
+    vecData = initDistanceArray(sensor, trajectory)
 
-    @threads for i in 1:count
-        data[i, :, :, :] .= calculateEField(trajectory[:, i], sensor, data[i, :, :, :], t[i])
+    @threads for i in 1:tCount
+        data[i, :, :, :], vecData[i, :, :, :] = calculateEField(trajectory[:, i], sensor, data[i, :, :, :], vecData[i, :, :, :], t[i])
     end
 
     t_data = data[:, :, :, 2]
@@ -41,27 +43,25 @@ default(aspect_ratio=:auto)
     end
 
 
-
-
     #= retard = true
 
     if retard == true
-       p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
+        p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
 
-       for i in 1:count
-           p.series_list[1].plotattributes[:z] = permutedims(interp_dist_data[i, :, :], [1, 2])
-           display(p)
-           sleep(1 / 10)
-       end
+        for i in 1:count
+            p.series_list[1].plotattributes[:z] = permutedims(interp_dist_data[i, :, :], [1, 2])
+            display(p)
+            sleep(1 / 10)
+        end
 
     else
-       p = contourf(xData, yData, permutedims(dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
+        p = contourf(xData, yData, permutedims(dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
 
-       for i in 1:count
-           p.series_list[1].plotattributes[:z] = permutedims(dist_data[i, :, :], [1, 2])
-           display(p)
-           sleep(1 / 10)
-       end
+        for i in 1:count
+            p.series_list[1].plotattributes[:z] = permutedims(dist_data[i, :, :], [1, 2])
+            display(p)
+            sleep(1 / 10)
+        end
 
     end =#
 

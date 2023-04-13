@@ -17,14 +17,15 @@ function initDistanceArray(sensor, trajectory)
     return Array{Float64}(undef, (size(trajectory, 2), size(sensor, 1), size(sensor, 2), 2))
 end
 
-function calculateEField(electron_position, sensor, data, t)
-    c0 = 3e8
+function calculateEField(electron_position, sensor, data, vecData, t)
     XDiff = electron_position[1] .- sensor[:, :, 1]
     YDiff = electron_position[2] .- sensor[:, :, 2]
     distances = (XDiff .^ 2 .+ YDiff .^ 2) .^ 0.5
     data[:, :, 1] .= distances
-    data[:, :, 2] .= t .+ distances ./ c0
-    return data
+    data[:, :, 2] .= t .+ distances ./ c
+    vecData[:, :, 1] .= XDiff
+    vecData[:, :, 2] .= YDiff
+    return data, vecData
 end
 
 function trajectory_y(xVals)
