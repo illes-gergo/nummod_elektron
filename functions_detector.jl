@@ -13,7 +13,7 @@ function initDataArray(sensor, trajectory)
     return Array{Float64}(undef, (size(trajectory, 2), size(sensor, 1), size(sensor, 2), 2))
 end
 
-function initDistanceArray(sensor,trajectory)
+function initDistanceArray(sensor, trajectory)
     return Array{Float64}(undef, (size(trajectory, 2), size(sensor, 1), size(sensor, 2), 2))
 end
 
@@ -32,6 +32,6 @@ function trajectory_y(xVals)
 end
 
 function calculateRadiationField(dist_synced::Array, dt::Number)
-    v_t = diff(dist_synced,dims=1) / dt
+    v_t = diff(dist_synced, dims=1) / dt
     beta_t = v_t ./ c
 end
