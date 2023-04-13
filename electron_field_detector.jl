@@ -4,6 +4,8 @@ include("functions_detector.jl")
 
 default(aspect_ratio=:auto)
 
+@time begin   
+
 xStart = -1e-4;
 yStart = -1e-4;
 xEnd = -xStart;
@@ -31,14 +33,17 @@ t_data = data[:, :, :, 2];
 dist_data = data[:, :, :, 1]
 interp_dist_data = copy(dist_data)
 
-for i in 1:count
+@threads for i in 1:count
     for j in 1:count
         itp = linear_interpolation(t_data[:, i, j], dist_data[:, i, j], extrapolation_bc=Line())
         interp_dist_data[:, i, j] .= itp(t)
     end
 end
 
-retard = true
+
+
+
+ #= retard = true
 
 if retard == true
     p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
@@ -59,3 +64,5 @@ else
     end
 
 end
+
+end =#
