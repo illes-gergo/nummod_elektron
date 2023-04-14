@@ -9,30 +9,24 @@ function createTrajectory(xStart, xEnd, count)
     return cat(xVals, trajectory_y(xVals), dims=1)
 end
 
-function initDataArray(sensor, trajectory)
-    return Array{Float64}(undef, (size(trajectory, 2), size(sensor, 1), size(sensor, 2), 2))
-end
-
 function initDistanceArray(sensor, trajectory)
-    return Array{Float64}(undef, (size(trajectory, 2), size(sensor, 1), size(sensor, 2), 2))
+    return Array{Float64}(undef, (size(trajectory, 2), size(sensor, 1), size(sensor, 2), 3))
 end
 
-function calculateEField(electron_position, sensor, data, vecData, t)
+function calculateEField(electron_position, sensor, vecData, t)
     XDiff = electron_position[1] .- sensor[:, :, 1]
     YDiff = electron_position[2] .- sensor[:, :, 2]
-    distances = (XDiff .^ 2 .+ YDiff .^ 2) .^ 0.5
-    data[:, :, 1] .= distances
-    data[:, :, 2] .= t .+ distances ./ c
     vecData[:, :, 1] .= XDiff
     vecData[:, :, 2] .= YDiff
-    return data, vecData
+    vecData[:, :, 3] = t .+ (XDiff .^ 2 .+ YDiff .^ 2) .^ 0.5 ./ c
+    return vecData
 end
 
 function trajectory_y(xVals)
     return sin.(2 .* pi .* xVals .* 1 ./ 1e-4) * 1e-5
 end
 
-function calculateRadiationField(dist_synced::Array, dt::Number)
-    v_t = diff(dist_synced, dims=1) / dt
-    beta_t = v_t ./ c
+function calculateRadiationField(xSynced::Array, ySynced::Array, distSynced::Array, dt::Real)
+  
+
 end
