@@ -21,6 +21,7 @@ default(aspect_ratio=:auto)
     c = 3e8
     e0 = 8.8541878128e-12
     mu0 = 1.25663706212e-6
+    qe = 1.60217663e-19
 
     sensor = createGridArray(xStart, xEnd, count, yStart, yEnd, count)
 
@@ -50,14 +51,14 @@ default(aspect_ratio=:auto)
 
     distSynced = (xSynced .^ 2 + ySynced .^ 2) .^ 0.5
 
-    #= 
+#=     
         retard = true
 
         if retard == true
-            p = contourf(xData, yData, permutedims(interp_dist_data[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
+            p = contourf(xData, yData, permutedims(distSynced[1, :, :], [2, 1]), linewidth=0, aspect_ratio=:equal, colormap=:jet, levels=100,) #=ylims=[yStart,yEnd]./5=#
 
             for i in 1:count
-                p.series_list[1].plotattributes[:z] = permutedims(interp_dist_data[i, :, :], [1, 2])
+                p.series_list[1].plotattributes[:z] = permutedims(distSynced[i, :, :], [1, 2])
                 display(p)
                 sleep(1 / 10)
             end
@@ -72,5 +73,5 @@ default(aspect_ratio=:auto)
             end
 
         end
-     =#
+    =# 
 end

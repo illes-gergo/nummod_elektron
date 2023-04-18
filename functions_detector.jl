@@ -27,6 +27,23 @@ function trajectory_y(xVals)
 end
 
 function calculateRadiationField(xSynced::Array, ySynced::Array, distSynced::Array, dt::Real)
-  
+    vX = myDiffTime(xSynced) / dt
+    vY = myDiffTime(ySynced) / dt
+    aX = myDiffTime(vX) / dt
+    aY = myDiffTime(vY) / dt
+    absV = (vX .^ 2 + vY .^ 2) .^ 0.5
 
+    term11 = qe / 4 / pi / e0 * (1 .- absV .^ 2)
+    term12xnum = xSynced .- distSynced .* vY
+    term12ynum = ySynced .- distSynced .* vY
+    term12nom = (distSynced - myDotProduct(xSynced, ySynced, vX, vY)) .^ 3
+
+end
+
+function myDiffTime(timeData::Array)
+    return cat(1, zeros(size(timeData)[2:end]...), diff(timeData, dims=1), dims=1)
+end
+
+function myDotProduct(X::Array, Y::Array, vX::Array, vY::Array)
+    X .* vX .+ Y .* vY
 end
