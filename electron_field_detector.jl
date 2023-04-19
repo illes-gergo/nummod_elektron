@@ -1,21 +1,24 @@
-using Base.Threads, LazyGrids, Interpolations, PlotlyJS
+using Base.Threads, LazyGrids, Interpolations, Plots
+
+
 
 include("functions_detector.jl")
 
+plotlyjs()
 
 @time begin
 
-    xStart = -2e-4
-    yStart = -2e-4
+    xStart = -5e-4
+    yStart = -5e-4
     xEnd = -xStart
     yEnd = -yStart
-    count = Int(1e2)
+    count = Int(2e2)
     tCount = Int(5e2)
 
     xData = range(xStart, xEnd, length=count)
     yData = range(yStart, yEnd, length=count)
 
-    dtSensor = 1e-14
+    dtSensor = 0.87e-14
     t = range(start=0, step=dtSensor, length=tCount)
     c = 3e8
     e0 = 8.8541878128e-12
@@ -53,9 +56,10 @@ include("functions_detector.jl")
 
     EFieldX, EFieldY = calculateRadiationField(xSynced, ySynced, distSynced, dtSensor)
 
-    trace1 = scatter(x=t, y=EFieldX[:,50,1], name="X")
-    trace2 = scatter(x=t, y=EFieldY[:,50,1], name="Y")
 
-    plot([trace1,trace2])
+    anim = @animate for i in 1:tCount
+        heatmap((EFieldX[i, :, :] .^ 2 .+ EFieldY[i, :, :] .^ 2) .^ 0.5, clims=(0,3),size=(1600,900))
+    end
 
+    mp4(anim, "electron.mp4",fps=10)
 end

@@ -50,7 +50,7 @@ function myDiffTime(timeData::Array)
 end
 
 function myDotProduct(X::Array, Y::Array, vX::Array, vY::Array)
-    X .* vX .+ Y .* vY
+    return X .* vX .+ Y .* vY
 end
 
 function myCrossProduct(Ax::Array, Ay::Array, Bx::Array, By::Array)
@@ -59,10 +59,11 @@ end
 
 function myCrossProduct(Ax::Array, Ay::Array, Bz::Array)
     outLen = myLength(Ax, Ay) .* Bz
-    outAng = mySingleAngle(Ay, Ay) .- pi ./ 2
+    outAng = mySingleAngle(Ax, Ay) .- pi ./ 2
     outCPLX = @. outLen * exp(1im * outAng)
     outX = @. real(outCPLX)
     outY = @. imag(outCPLX)
+    return outX, outY
 end
 
 function myAngle(Ax::Array, Ay::Array, Bx::Array, By::Array)
