@@ -4,9 +4,26 @@ function createGridArray(xStart, xEnd, xCount, yStart, yEnd, yCount)
     return output
 end
 
-function createTrajectory(xStart, xEnd, count)
-    xVals = range(xStart, xEnd, Int(count))'
-    return cat(xVals, trajectory_y(xVals), dims=1)
+function createTrajectory(tData; xStart=-1e-3, velocity=0.995 * c, yStart=0)
+    #=  dt = tData[2] - tData[1]
+     omega = 50e12
+     outX = Array{Float64}(undef, length(tData))
+     outY = Array{Float64}(undef, length(tData))
+     forwardBias = 0.2
+     outX[1] = xStart
+     outY[1] = yStart
+
+     for i = eachindex(tData)[2:end]
+         vY = (1 - forwardBias) * sin(omega * tData[i])
+         vX = (1 - vY^2)^0.5
+         outX[i] = outX[i-1] + dt * velocity * vX
+         outY[i] = outY[i-1] + dt * velocity * vY
+     end =#
+     tspan = tData[end]-tData[1]
+    omega = 2*pi/tspan
+    outX = range(xStart, -xStart, length=length(tData))
+    outY = sin.(tData*4*omega) .* xStart ./ 4
+    return cat(outX', outY', dims=1)
 end
 
 function initDistanceArray(sensor, trajectory)
@@ -20,10 +37,6 @@ function calculateEField(electron_position, sensor, vecData, t)
     vecData[:, :, 2] .= YDiff
     vecData[:, :, 3] = t .+ (XDiff .^ 2 .+ YDiff .^ 2) .^ 0.5 ./ c
     return vecData
-end
-
-function trajectory_y(xVals)
-    return sin.(2 .* pi .* xVals .* 1 ./ 1e-4) * 1e-5
 end
 
 function calculateRadiationField(xSynced::Array, ySynced::Array, distSynced::Array, dt::Real)
@@ -40,8 +53,8 @@ function calculateRadiationField(xSynced::Array, ySynced::Array, distSynced::Arr
     term21 = qe * mu0 / 4
     term2in = myCrossProduct(term12xnum, term12ynum, aX, aY)
     term2outX, term2outY = myCrossProduct(xSynced, ySynced, term2in)
-    outX = @. (term11 * term12xnum + term21 * term2outX) / termnom
-    outY = @. (term11 * term12ynum + term21 * term2outY) / termnom
+    outX = @. (term11 * term12xnum * 0 + term21 * term2outX) / termnom
+    outY = @. (term11 * term12ynum * 0 + term21 * term2outY) / termnom
     return outX, outY
 end
 
@@ -54,16 +67,20 @@ function myDotProduct(X::Array, Y::Array, vX::Array, vY::Array)
 end
 
 function myCrossProduct(Ax::Array, Ay::Array, Bx::Array, By::Array)
-    return myLength(Ax, Ay) .* myLength(Bx, By) .* sin.(myAngle(Ax, Ay, Bx, By))
+    #return myLength(Ax, Ay) .* myLength(Bx, By) .* sin.(myAngle(Ax, Ay, Bx, By))
+    return Ax .* By - Ay .* Bx
 end
 
 function myCrossProduct(Ax::Array, Ay::Array, Bz::Array)
-    outLen = myLength(Ax, Ay) .* Bz
+    #= outLen = myLength(Ax, Ay) .* Bz
     outAng = mySingleAngle(Ax, Ay) .- pi ./ 2
     outCPLX = @. outLen * exp(1im * outAng)
     outX = @. real(outCPLX)
     outY = @. imag(outCPLX)
-    return outX, outY
+    return outX, outY =#
+    outX = Ay .* Bz
+    outY = Ax .* Bz
+    return outX, -outY
 end
 
 function myAngle(Ax::Array, Ay::Array, Bx::Array, By::Array)
@@ -81,4 +98,9 @@ end
 function mySingleAngle(Ax::Array, Ay::Array)
     vecCPLX = @. Ax + 1im * Ay
     return angle.(vecCPLX)
+end
+
+function gamma(timesC::Real)
+    c0 = 3e8
+    return 1 / sqrt(1 - (timesC * c0)^2 / c0^2)
 end

@@ -1,24 +1,20 @@
 using Base.Threads, LazyGrids, Interpolations, Plots
 
-
-
 include("functions_detector.jl")
-
-plotlyjs()
 
 @time begin
 
-    xStart = -5e-4
-    yStart = -5e-4
+    xStart = -2e-4
+    yStart = -2e-4
     xEnd = -xStart
     yEnd = -yStart
     count = Int(2e2)
-    tCount = Int(5e2)
+    tCount = Int(1e3)
 
     xData = range(xStart, xEnd, length=count)
     yData = range(yStart, yEnd, length=count)
 
-    dtSensor = 0.87e-14
+    dtSensor = 0.3e-14
     t = range(start=0, step=dtSensor, length=tCount)
     c = 3e8
     e0 = 8.8541878128e-12
@@ -27,7 +23,7 @@ plotlyjs()
 
     sensor = createGridArray(xStart, xEnd, count, yStart, yEnd, count)
 
-    trajectory = createTrajectory(xStart, xEnd, tCount)
+    trajectory = createTrajectory(t, xStart=xStart)
 
     vecData = initDistanceArray(sensor, trajectory)
 
@@ -55,11 +51,10 @@ plotlyjs()
 
 
     EFieldX, EFieldY = calculateRadiationField(xSynced, ySynced, distSynced, dtSensor)
-
-
-    anim = @animate for i in 1:tCount
-        heatmap((EFieldX[i, :, :] .^ 2 .+ EFieldY[i, :, :] .^ 2) .^ 0.5, clims=(0,3),size=(1600,900))
-    end
-
-    mp4(anim, "electron.mp4",fps=10)
 end
+
+@time anim = @animate for i = 1:1:tCount
+    heatmap((EFieldX[i, :, :] .^ 2 .+ EFieldY[i, :, :] .^ 2) .^ 0.5, size=(800, 600), clims=(0, 5))
+end
+
+@time mp4(anim, "electron1.mp4")
